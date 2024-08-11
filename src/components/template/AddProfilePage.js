@@ -1,10 +1,12 @@
 "use client";
 import CustomDatePicker from "@/module/CustomDatePicker";
+import Loader from "@/module/Loader";
 import RadioList from "@/module/RadioList";
 import TextInput from "@/module/TextInput";
 import TextList from "@/module/TextList";
 import styles from "@/template/AddProfilePage.module.css";
 import { useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
 
 function AddProfilePage() {
   const [profileData, setProfileData] = useState({
@@ -19,18 +21,22 @@ function AddProfilePage() {
     rules: [],
     amenities: [],
   });
+
+  const [loading, setLoading] = useState(false);
+
   const submitHandler = async () => {
+    setLoading(true);
     const res = await fetch("/api/profile", {
       method: "POST",
       body: JSON.stringify(profileData),
       headers: { "Content-Type": "application/json" },
     });
     const data = await res.json();
-
+    setLoading(false);
     if (data.error) {
-      console.log(data);
+      toast.error(data.error);
     } else {
-      console.log("uccess", data);
+      toast.success(data.message);
     }
   };
   return (
@@ -90,9 +96,14 @@ function AddProfilePage() {
         profileData={profileData}
         setProfileData={setProfileData}
       />
-      <button className={styles.submit} onClick={submitHandler}>
-        ثبت آگهی
-      </button>
+      <Toaster />
+      {loading ? (
+        <Loader />
+      ) : (
+        <button className={styles.submit} onClick={submitHandler}>
+          ثبت آگهی
+        </button>
+      )}
     </div>
   );
 }
